@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
 
-int main(int argc, char const *argv[])
+int main(int argc, char * const argv[])
 {
 	int o = -1;
 	bool from_file = true;
@@ -20,6 +21,9 @@ int main(int argc, char const *argv[])
 		{
 			case 'm':
 				from_file = false;
+				machine_string = optarg;
+				break;
+			case '-f':
 				machine_string = optarg;
 				break;
 			case 'e':
@@ -40,10 +44,13 @@ int main(int argc, char const *argv[])
 		}
 	}
 
-	if (error)
+	if (error || o == -1)
 	{
-		fprintf(stderr, "Usage: fsa [-i] [-e input_string] <-m machine_string | machine_filename>\n");
+		fprintf(stderr, "Usage: fsa [-i] [-e input_string] <-m machine_string | -f machine_filename>\n");
+		exit(EXIT_FAILURE);
 	}
+
+
 
 	return 0;
 }
