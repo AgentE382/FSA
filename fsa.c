@@ -23,7 +23,7 @@ int main(int argc, char * const argv[])
 				from_file = false;
 				machine_string = optarg;
 				break;
-			case '-f':
+			case 'f':
 				machine_string = optarg;
 				break;
 			case 'e':
