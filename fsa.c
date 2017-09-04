@@ -5,6 +5,51 @@
 #include <string.h>
 #include <stdlib.h>
 
+void syserr(const char *m)
+{
+	perror(m);
+	exit(EXIT_FAILURE);
+}
+
+void usererr(const char *m)
+{
+	fprintf(stderr, "%s\n", m);
+	exit(EXIT_FAILURE);
+}
+
+char *read_file(const char *filename)
+{
+	char *result;
+	size_t pos, size;
+	int c;
+	FILE *f;
+
+	if (!(result = (char *)malloc(sizeof(*result) + 1)))
+		syserr(filename);
+	pos = 0;
+	size = 1;
+
+	f = fopen(filename, "r");
+
+	if (!f)
+		syserr(filename);
+
+	while ((c = fgetc(f)) != EOF)
+	{
+		result[pos] = c;
+		if (++pos == size)
+		{
+			size <<= 1;
+			if (!(result = (char *)realloc(result, sizeof(*result) * size + 1)))
+				syserr(filename);
+		}
+	}
+
+	result[pos] = 0;
+
+	return result;
+}
+
 int main(int argc, char * const argv[])
 {
 	int o = -1;
@@ -15,7 +60,8 @@ int main(int argc, char * const argv[])
 	char *machine_string = NULL;
 	char *input_string = NULL;
 	
-	while ((o = getopt(argc, argv, ":m:e:i")) != -1)
+	// process arguments
+	while ((o = getopt(argc, argv, ":m:f:e:i")) != -1)
 	{
 		switch (o)
 		{
@@ -44,13 +90,12 @@ int main(int argc, char * const argv[])
 		}
 	}
 
-	if (error || o == -1)
-	{
-		fprintf(stderr, "Usage: fsa [-i] [-e input_string] <-m machine_string | -f machine_filename>\n");
-		exit(EXIT_FAILURE);
-	}
+	// handle parsing errors
+	if (error || !machine_string)
+		usererr("Usage: fsa [-i] [-e input_string] <-m machine_string | -f machine_filename>");
 
-
+	if (from_file)
+		machine_string = read_file(machine_string);
 
 	return 0;
 }
